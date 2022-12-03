@@ -4,9 +4,14 @@ import a1 from "./1.ts";
 import a2 from "./2.ts";
 
 Deno.test({
-  name: "check",
+  name: "1",
   fn() {
     assertEquals(a1, 68442);
+  },
+});
+Deno.test({
+  name: "2",
+  fn() {
     assertEquals(a2, 204837);
   },
 });

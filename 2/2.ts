@@ -9,17 +9,33 @@ enum Play {
   Scisors,
 }
 
-const decode = (str: string): Play => {
+enum Order {
+  Lose,
+  Draw,
+  Win,
+}
+
+const decodePlay = (str: string): Play => {
   switch (str) {
     case "A":
-    case "X":
       return Play.Rock;
     case "B":
-    case "Y":
       return Play.Paper;
     case "C":
-    case "Z":
       return Play.Scisors;
+    default:
+      return assertNever(str);
+  }
+};
+
+const decodeOrder = (str: string): Order => {
+  switch (str) {
+    case "X":
+      return Order.Lose;
+    case "Y":
+      return Order.Draw;
+    case "Z":
+      return Order.Win;
     default:
       return assertNever(str);
   }
@@ -35,7 +51,21 @@ const flip = <A, B>([k, v]: [A, B]): [B, A] => [v, k];
 
 const winsTo = new Map<Play, Play>([...losesTo.entries()].map(flip));
 
-const score = ([them, ours]: [Play, Play]): number => {
+const playFromOrder = (them: Play, order: Order): Play => {
+  switch (order) {
+    case Order.Lose:
+      return losesTo.get(them)!;
+    case Order.Draw:
+      return them;
+    case Order.Win:
+      return winsTo.get(them)!;
+    default:
+      return assertNever(order);
+  }
+};
+
+const score = ([them, order]: [Play, Order]): number => {
+  const ours = playFromOrder(them, order);
   return scoreCombo([them, ours]) + scoreOurHand(ours);
 };
 
@@ -67,7 +97,7 @@ const a = (await ir(import.meta.resolve))
     const a = l.split(" ");
     switch (a.length) {
       case 2:
-        return [decode(a[0]), decode(a[1])] as [Play, Play];
+        return [decodePlay(a[0]), decodeOrder(a[1])] as [Play, Order];
       default:
         return assertNever(a);
     }
