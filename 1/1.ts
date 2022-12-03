@@ -1,10 +1,9 @@
-const contents = (new TextDecoder("utf-8")).decode(
-  await Deno.readFile("./input"),
-);
+import input from "./input.ts";
 
-const a = contents
+const a = input
+  .trim()
   .split("\n\n")
-  .map((span) => span.split("\n").map((l) => Number.parseInt(l) || 0))
+  .map((span) => span.split("\n").map((l) => Number.parseInt(l)))
   .filter((a) => a.length)
   .map((l) => l.reduce((acc, n) => acc + n, 0))
   .reduce((acc, n) => n < acc ? acc : n, 0);
