@@ -1,15 +1,17 @@
-import ir from "../input_reader.ts";
+import { input_reader } from "../libtapete.ts";
 
-const a = (await ir(import.meta.resolve))
+const add = (a: number, b: number): number => a + b;
+const max = (a: number, b: number): number => a > b ? a : b;
+
+const a = (await input_reader(import.meta.resolve))
   .trim()
   .split("\n\n")
-  .map((span) => span.split("\n").map((l) => Number.parseInt(l)))
-  .filter((a) => a.length)
-  .map((l) => l.reduce((acc, n) => acc + n, 0))
-  .reduce((acc, n) => n < acc ? acc : n, 0);
+  .map((span) => span.split("\n").map((l) => +new Number(l)))
+  .map((l) => l.reduce(add))
+  .reduce(max);
 
 export default a;
 
 if (import.meta.main) {
-  console.log(JSON.stringify(a, null, 2));
+  console.log(a);
 }

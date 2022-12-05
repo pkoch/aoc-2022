@@ -1,7 +1,4 @@
-import ir from "../input_reader.ts";
-import { assertNever } from "../under_the_carpet.ts";
-
-const add = (a: number, b: number): number => a + b;
+import { input_reader } from "../libtapete.ts";
 
 interface Range {
   // Inclusive on both sides.
@@ -10,16 +7,11 @@ interface Range {
 }
 
 const decodeRange = (s: string): Range => {
-  const a = s.split("-");
-  switch (a.length) {
-    case 2:
-      return {
-        lower: parseInt(a[0]),
-        upper: parseInt(a[1]),
-      };
-    default:
-      return assertNever(a);
-  }
+  const a = s.split("-", 2).map((n) => +new Number(n));
+  return {
+    lower: a[0],
+    upper: a[1],
+  };
 };
 
 interface RangePair {
@@ -28,32 +20,26 @@ interface RangePair {
 }
 
 const decodeRangePair = (s: string): RangePair => {
-  const a = s.split(",");
-  switch (a.length) {
-    case 2:
-      return {
-        left: decodeRange(a[0]),
-        right: decodeRange(a[1]),
-      };
-    default:
-      return assertNever(a);
-  }
+  const a = s.split(",", 2).map(decodeRange);
+  return {
+    left: a[0],
+    right: a[1],
+  };
 };
 
-const dontOverlap = (rp: RangePair): boolean => {
-  return rp.left.upper < rp.right.lower || rp.right.upper < rp.left.lower;
+const overlaps = (rp: RangePair): boolean => {
+  return rp.left.upper >= rp.right.lower && rp.right.upper >= rp.left.lower;
 };
 
-const a = (await ir(import.meta.resolve))
+const a = (await input_reader(import.meta.resolve))
   .trim()
   .split("\n")
   .map(decodeRangePair)
-  .map(dontOverlap)
-  .map((v) => +!v)
-  .reduce(add);
+  .filter(overlaps)
+  .length;
 
 export default a;
 
 if (import.meta.main) {
-  console.log(JSON.stringify(a, null, 2));
+  console.log(a);
 }

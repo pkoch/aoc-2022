@@ -9,6 +9,7 @@ Deno.test({
     assertEquals(a1, 68442);
   },
 });
+
 Deno.test({
   name: "2",
   fn() {

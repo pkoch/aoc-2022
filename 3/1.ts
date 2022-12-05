@@ -1,49 +1,31 @@
-import ir from "../input_reader.ts";
-import { assertNever } from "../under_the_carpet.ts";
+import { input_reader } from "../libtapete.ts";
+import { assertNever } from "../libtapete.ts";
 
-const add = (a: number, b: number): number => a + b;
-
-const intersect = <U>(a: Set<U>, b: Set<U>): Set<U> =>
-  new Set([...a.values()].filter((n) => b.has(n)));
-
-class Rucksack {
-  left: string[];
-  right: string[];
-
-  constructor(left: string[], right: string[]) {
-    this.left = left;
-    this.right = right;
-
-    if (this.commonItem().length == 0) {
-      throw new Error(`No common elements: ${JSON.stringify({ left, right })}`);
-    }
-  }
-
-  commonItem(): string {
-    return [...intersect(new Set(this.left), new Set(this.right)).values()][0];
-  }
-
-  static build(str: string): Rucksack {
-    if (str.length % 2 != 0) {
-      throw new Error(`Odd number of elements: ${str}`);
-    }
-
-    const left = str.slice(0, str.length / 2).split("");
-    const right = str.slice(str.length / 2, str.length).split("");
-
-    return new Rucksack(left, right);
+declare global {
+  interface String {
+    splitAt: (pos: number) => string[];
   }
 }
 
-const VALID_ITEMS = /[a-zA-Z]/;
-const priority = (s: string): number => {
-  const c = s[0];
-  if (c.length != 1) {
-    throw new Error(`Can only know the priority of a letter, got ${c}`);
-  }
-  if (!VALID_ITEMS.test(c)) {
-    throw new Error(`Letter must match ${VALID_ITEMS}, got ${c}`);
-  }
+String.prototype.splitAt = function (pos: number): string[] {
+  return [
+    this.slice(0, pos),
+    this.slice(pos, this.length),
+  ];
+};
+
+const add = (a: number, b: number): number => a + b;
+
+const intersect = (items: string[]): string =>
+  [
+    ...items.map((i) => new Set(i)).reduce((a, b) =>
+      new Set([...a.values()].filter((n) => b.has(n)))
+    ).values(),
+  ].join("");
+
+const VALID_ITEMS = /^[a-zA-Z]$/;
+const priority = (c: string): number => {
+  if (!c.match(VALID_ITEMS)) return assertNever(c);
 
   const charCode = c.charCodeAt(0);
 
@@ -57,16 +39,16 @@ const priority = (s: string): number => {
   return assertNever(charCode);
 };
 
-const a = (await ir(import.meta.resolve))
+const a = (await input_reader(import.meta.resolve))
   .trim()
   .split("\n")
-  .map(Rucksack.build)
-  .map((r) => r.commonItem())
+  .map((s) => s.splitAt(s.length / 2))
+  .map(intersect)
   .map(priority)
   .reduce(add);
 
 export default a;
 
 if (import.meta.main) {
-  console.log(JSON.stringify(a, null, 2));
+  console.log(a);
 }

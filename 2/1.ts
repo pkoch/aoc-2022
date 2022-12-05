@@ -1,5 +1,4 @@
-import ir from "../input_reader.ts";
-import { assertNever } from "../under_the_carpet.ts";
+import { assertNever, input_reader } from "../libtapete.ts";
 
 const add = (a: number, b: number): number => a + b;
 
@@ -9,7 +8,7 @@ enum Play {
   Scisors,
 }
 
-const decode = (str: string): Play => {
+const decodePlay = (str: string): Play => {
   switch (str) {
     case "A":
     case "X":
@@ -60,17 +59,12 @@ const scoreOurHand = (ours: Play): number => {
   }
 };
 
-const a = (await ir(import.meta.resolve))
+const a = (await input_reader(import.meta.resolve))
   .trim()
   .split("\n")
-  .map((l) => {
-    const a = l.split(" ");
-    switch (a.length) {
-      case 2:
-        return [decode(a[0]), decode(a[1])] as [Play, Play];
-      default:
-        return assertNever(a);
-    }
+  .map((l): [Play, Play] => {
+    const [lS, rS] = l.split(" ", 2);
+    return [decodePlay(lS), decodePlay(rS)];
   })
   .map(score)
   .reduce(add);
@@ -78,5 +72,5 @@ const a = (await ir(import.meta.resolve))
 export default a;
 
 if (import.meta.main) {
-  console.log(JSON.stringify(a, null, 2));
+  console.log(a);
 }

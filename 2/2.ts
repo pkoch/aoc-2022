@@ -1,5 +1,4 @@
-import ir from "../input_reader.ts";
-import { assertNever } from "../under_the_carpet.ts";
+import { assertNever, input_reader } from "../libtapete.ts";
 
 const add = (a: number, b: number): number => a + b;
 
@@ -7,12 +6,6 @@ enum Play {
   Rock,
   Paper,
   Scisors,
-}
-
-enum Order {
-  Lose,
-  Draw,
-  Win,
 }
 
 const decodePlay = (str: string): Play => {
@@ -28,19 +21,6 @@ const decodePlay = (str: string): Play => {
   }
 };
 
-const decodeOrder = (str: string): Order => {
-  switch (str) {
-    case "X":
-      return Order.Lose;
-    case "Y":
-      return Order.Draw;
-    case "Z":
-      return Order.Win;
-    default:
-      return assertNever(str);
-  }
-};
-
 const losesTo = new Map<Play, Play>([
   [Play.Paper, Play.Rock],
   [Play.Scisors, Play.Paper],
@@ -51,21 +31,7 @@ const flip = <A, B>([k, v]: [A, B]): [B, A] => [v, k];
 
 const winsTo = new Map<Play, Play>([...losesTo.entries()].map(flip));
 
-const playFromOrder = (them: Play, order: Order): Play => {
-  switch (order) {
-    case Order.Lose:
-      return losesTo.get(them)!;
-    case Order.Draw:
-      return them;
-    case Order.Win:
-      return winsTo.get(them)!;
-    default:
-      return assertNever(order);
-  }
-};
-
-const score = ([them, order]: [Play, Order]): number => {
-  const ours = playFromOrder(them, order);
+const score = ([them, ours]: [Play, Play]): number => {
   return scoreCombo([them, ours]) + scoreOurHand(ours);
 };
 
@@ -90,17 +56,46 @@ const scoreOurHand = (ours: Play): number => {
   }
 };
 
-const a = (await ir(import.meta.resolve))
+enum Order {
+  Lose,
+  Draw,
+  Win,
+}
+
+const decodeOrder = (str: string): Order => {
+  switch (str) {
+    case "X":
+      return Order.Lose;
+    case "Y":
+      return Order.Draw;
+    case "Z":
+      return Order.Win;
+    default:
+      return assertNever(str);
+  }
+};
+
+const playFromOrder = (them: Play, order: Order): Play => {
+  switch (order) {
+    case Order.Lose:
+      return losesTo.get(them)!;
+    case Order.Draw:
+      return them;
+    case Order.Win:
+      return winsTo.get(them)!;
+    default:
+      return assertNever(order);
+  }
+};
+
+const a = (await input_reader(import.meta.resolve))
   .trim()
   .split("\n")
-  .map((l) => {
-    const a = l.split(" ");
-    switch (a.length) {
-      case 2:
-        return [decodePlay(a[0]), decodeOrder(a[1])] as [Play, Order];
-      default:
-        return assertNever(a);
-    }
+  .map((l): [Play, Play] => {
+    const [lS, rS] = l.split(" ", 2);
+    const them = decodePlay(lS);
+    const ours = playFromOrder(them, decodeOrder(rS));
+    return [them, ours];
   })
   .map(score)
   .reduce(add);
@@ -108,5 +103,5 @@ const a = (await ir(import.meta.resolve))
 export default a;
 
 if (import.meta.main) {
-  console.log(JSON.stringify(a, null, 2));
+  console.log(a);
 }

@@ -1,5 +1,4 @@
-import ir from "../input_reader.ts";
-import { assertNever } from "../under_the_carpet.ts";
+import { assertNever, input_reader } from "../libtapete.ts";
 
 declare global {
   interface Array<T> {
@@ -19,18 +18,16 @@ Array.prototype.chunks = function <U>(this: U[], size: number): U[][] {
 
 const add = (a: number, b: number): number => a + b;
 
-const intersect = <U>(a: Set<U>, b: Set<U>): Set<U> =>
-  new Set([...a.values()].filter((n) => b.has(n)));
+const intersect = (items: string[]): string =>
+  [
+    ...items.map((i) => new Set(i)).reduce((a, b) =>
+      new Set([...a.values()].filter((n) => b.has(n)))
+    ).values(),
+  ].join("");
 
-const VALID_ITEMS = /[a-zA-Z]/;
-const priority = (s: string): number => {
-  const c = s[0];
-  if (c.length != 1) {
-    throw new Error(`Can only know the priority of a letter, got ${c}`);
-  }
-  if (!VALID_ITEMS.test(c)) {
-    throw new Error(`Letter must match ${VALID_ITEMS}, got ${c}`);
-  }
+const VALID_ITEMS = /^[a-zA-Z]$/;
+const priority = (c: string): number => {
+  if (!c.match(VALID_ITEMS)) return assertNever(c);
 
   const charCode = c.charCodeAt(0);
 
@@ -44,11 +41,11 @@ const priority = (s: string): number => {
   return assertNever(charCode);
 };
 
-const a = (await ir(import.meta.resolve))
+const a = (await input_reader(import.meta.resolve))
   .trim()
   .split("\n")
   .chunks(3)
-  .map((ss) => [...ss.map((s) => new Set(s)).reduce(intersect).values()][0])
+  .map(intersect)
   .map(priority)
   .reduce(add);
 

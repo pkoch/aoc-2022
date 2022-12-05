@@ -1,11 +1,6 @@
-import ir from "../input_reader.ts";
-import { assertNever } from "../under_the_carpet.ts";
+import { assertNever, input_reader } from "../libtapete.ts";
 
-const lastOr = <V>(arr: V[], fallback: V): V => {
-  return arr.length ? arr.slice(-1)[0] : fallback;
-};
-
-const zip = <U, V>(a: U[], b: V[]): [U, V][] => a.map((k, i) => [k, b[i]]);
+const zip = <U, V>(a: U[], b: V[]): [U, V?][] => a.map((k, i) => [k, b.at(i)]);
 
 interface MoveOrder {
   n: number;
@@ -41,9 +36,10 @@ const decodeCrateStacks = (s: string): CrateStacks => {
 
   const result: CrateStacks = Object.fromEntries(labels.map((l) => [l, []]));
   for (const line of lines) {
-    // line + ' ': See the note on CRATE_LINE_RE.
+    // line + " ": See the note on CRATE_LINE_RE.
     const matches = [...(line + " ").matchAll(CRATE_LINE_RE)];
     if (!matches) return assertNever(line);
+    if (matches.length !== labels.length) return assertNever(line);
     for (const [l, v] of zip(labels, matches.map((m) => m.groups!.letter))) {
       if (!v) continue;
       result[l].unshift(v);
@@ -59,30 +55,34 @@ const decode = (s: string): {
   const [crateStacksS, moveOrdersS] = s.split("\n\n", 2);
   return {
     crateStacks: decodeCrateStacks(crateStacksS),
-    moveOrders: moveOrdersS.split("\n").filter((l) => l.length).map(
-      decodeMoveOrder,
-    ),
+    moveOrders: moveOrdersS.trim().split("\n").map(decodeMoveOrder),
   };
 };
 
 const applyMoveOrder = (state: CrateStacks, order: MoveOrder): CrateStacks => {
   const result: CrateStacks = JSON.parse(JSON.stringify(state));
-  for (let i = 0; i < order.n; i++) {
-    result[order.to].push(result[order.from].pop()!);
-  }
+
+  result[order.to] = [
+    ...result[order.to],
+    ...result[order.from].slice(-order.n).reverse(),
+  ];
+  result[order.from].splice(-order.n);
+
   return result;
 };
 
-const { crateStacks, moveOrders } = decode(await ir(import.meta.resolve));
+const { crateStacks, moveOrders } = decode(
+  await input_reader(import.meta.resolve),
+);
 
 const endState = moveOrders.reduce(applyMoveOrder, crateStacks);
 
 const a = Object.values(endState)
-  .map((s) => lastOr(s, " "))
+  .map((s) => s.at(-1)!)
   .reduce((a, b) => a + b);
 
 export default a;
 
 if (import.meta.main) {
-  console.log(JSON.stringify(a, null, 2));
+  console.log(a);
 }
