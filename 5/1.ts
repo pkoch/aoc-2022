@@ -42,10 +42,10 @@ const decodeCrateStacks = (s: string): CrateStacks => {
   const result: CrateStacks = Object.fromEntries(labels.map((l) => [l, []]));
   for (const line of lines) {
     // line + ' ': See the note on CRATE_LINE_RE.
-    const matches = [...(line + ' ').matchAll(CRATE_LINE_RE)];
-    if(!matches) return assertNever(line);
-    for(const [l, v] of zip(labels, matches.map(m => m.groups!.letter))){
-      if(!v) continue;
+    const matches = [...(line + " ").matchAll(CRATE_LINE_RE)];
+    if (!matches) return assertNever(line);
+    for (const [l, v] of zip(labels, matches.map((m) => m.groups!.letter))) {
+      if (!v) continue;
       result[l].unshift(v);
     }
   }
@@ -59,16 +59,18 @@ const decode = (s: string): {
   const [crateStacksS, moveOrdersS] = s.split("\n\n", 2);
   return {
     crateStacks: decodeCrateStacks(crateStacksS),
-    moveOrders: moveOrdersS.split("\n").filter(l => l.length).map(decodeMoveOrder),
+    moveOrders: moveOrdersS.split("\n").filter((l) => l.length).map(
+      decodeMoveOrder,
+    ),
   };
 };
 
 const applyMoveOrder = (state: CrateStacks, order: MoveOrder): CrateStacks => {
-  const result: CrateStacks = JSON.parse(JSON.stringify(state))
-  for(let i = 0; i < order.n; i++){
-    result[order.to].push(result[order.from].pop()!)
+  const result: CrateStacks = JSON.parse(JSON.stringify(state));
+  for (let i = 0; i < order.n; i++) {
+    result[order.to].push(result[order.from].pop()!);
   }
-  return result
+  return result;
 };
 
 const { crateStacks, moveOrders } = decode(await ir(import.meta.resolve));

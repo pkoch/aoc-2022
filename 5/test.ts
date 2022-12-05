@@ -6,13 +6,13 @@ import a2 from "./2.ts";
 Deno.test({
   name: "1",
   fn() {
-    assertEquals(a1, 'ZBDRNPMVH');
+    assertEquals(a1, "ZBDRNPMVH");
   },
 });
 
 Deno.test({
   name: "2",
   fn() {
-    assertEquals(a2, 'WDLPFNNNB');
+    assertEquals(a2, "WDLPFNNNB");
   },
 });
