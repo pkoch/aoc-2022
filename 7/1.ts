@@ -45,8 +45,7 @@ const decodeComamnd = (s: string): Command => {
 export const decode = (s: string): Command[] => {
   const commandsS = s.split("\n$ ");
 
-  if (commandsS[0] != "$ cd /") throw new Error(commandsS[0]);
-  commandsS.shift();
+  if (commandsS.shift() != "$ cd /") throw new Error();
 
   return commandsS.map(decodeComamnd);
 };
@@ -70,51 +69,31 @@ const lsEntryToDirEntry = (parent: Dir, ls: LsEntry): DirEntry => {
   return { ...ls, parent, entries: [] };
 };
 
-export const makeRootDir = (): Dir => {
-  // deno-lint-ignore no-explicit-any
-  const result: any = { name: "/", entries: [] };
-  result.parent = result;
-  return result;
-};
-
 const makeTree = (curr: Dir, command: Command): Dir => {
   if ("cd" in command) {
     const { cd: targetName } = command;
-    if (targetName == "..") {
-      if (curr.parent == curr) {
-        return assertNever({ reason: "Can't traverse up from root.", curr });
-      }
-      return curr.parent;
-    }
+    if (targetName == "..") return curr.parent;
 
-    if (!curr.entries.length) {
-      return assertNever({
-        reason: "Can't cd down on an unexplored dir",
-        curr,
-        command,
-      });
-    }
-    const target = curr.entries.find((e) => e.name == targetName);
-
-    if (!target) return assertNever({ target, curr });
+    const target = curr.entries.find((e) => e.name == targetName)!;
     if ("size" in target) return assertNever({ target, curr });
+
     return target;
   }
-  if ("ls" in command) {
-    if (curr.entries.length) {
-      return assertNever({
-        reason: "Surprising ls on an explored dir",
-        curr,
-        command,
-      });
-    }
 
+  if ("ls" in command) {
     curr.entries = command.ls.map((ls) => lsEntryToDirEntry(curr, ls));
 
     return curr;
   }
 
   return assertNever({ curr, command });
+};
+
+export const makeRootDir = (): Dir => {
+  // deno-lint-ignore no-explicit-any
+  const result: any = { name: "/", entries: [] };
+  result.parent = result;
+  return result;
 };
 
 const getRoot = (d: Dir): Dir => {
@@ -132,8 +111,7 @@ export function preTraverseTree(d: DirEntry): DirEntry[] {
 export const isDir = (o: any): o is Dir =>
   "parent" in o &&
   "name" in o &&
-  "entries" in o &&
-  o.entries;
+  "entries" in o;
 
 // deno-lint-ignore no-explicit-any
 const isFile = (o: any): o is File =>
