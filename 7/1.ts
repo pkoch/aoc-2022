@@ -1,6 +1,5 @@
 import { add, assertNever, input_reader } from "../libtapete.ts";
 import "../langExts/String/splitAt.ts";
-import "../langExts/Object/thrush.ts";
 
 interface LsDir {
   name: string;
