@@ -1,5 +1,5 @@
-import { assertNever, input_reader } from "../libtapete.ts";
-import { add, losesTo, Play, score, winsTo } from "./1.ts";
+import { add, assertNever, input_reader } from "../libtapete.ts";
+import { losesTo, Play, score, winsTo } from "./1.ts";
 
 const decodePlay = (str: string): Play => {
   switch (str) {

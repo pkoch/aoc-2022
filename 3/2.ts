@@ -1,6 +1,6 @@
-import { input_reader } from "../libtapete.ts";
+import { add, input_reader } from "../libtapete.ts";
 import "../langExts/Array/chunks.ts";
-import { add, intersect, priority } from "./1.ts";
+import { intersect, priority } from "./1.ts";
 
 const a = (await input_reader(import.meta.resolve))
   .trim()

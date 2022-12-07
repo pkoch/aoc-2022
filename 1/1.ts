@@ -1,6 +1,5 @@
-import { input_reader } from "../libtapete.ts";
+import { add, input_reader } from "../libtapete.ts";
 
-export const add = (a: number, b: number): number => a + b;
 const max = (a: number, b: number): number => a > b ? a : b;
 
 export const decode = (s: string): number[][] =>

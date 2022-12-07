@@ -1,7 +1,5 @@
-import { assertNever, input_reader } from "../libtapete.ts";
+import { add, assertNever, input_reader } from "../libtapete.ts";
 import "../langExts/String/splitAt.ts";
-
-export const add = (a: number, b: number): number => a + b;
 
 export const intersect = (items: string[]): string =>
   [

@@ -1,6 +1,4 @@
-import { assertNever, input_reader } from "../libtapete.ts";
-
-export const add = (a: number, b: number): number => a + b;
+import { add, assertNever, input_reader } from "../libtapete.ts";
 
 export enum Play {
   Rock,
