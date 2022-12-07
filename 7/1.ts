@@ -1,5 +1,6 @@
 import { add, assertNever, input_reader } from "../libtapete.ts";
 import "../langExts/String/splitAt.ts";
+import "../langExts/Array/all.ts";
 
 interface LsDir {
   name: string;
@@ -42,27 +43,6 @@ const decodeComamnd = (s: string): Command => {
   }
 };
 
-interface UnexploredDir {
-  parent: Dir;
-  name: string;
-
-  entries?: undefined;
-}
-interface Dir {
-  parent: Dir;
-  name: string;
-
-  entries: DirEntry[];
-}
-interface File {
-  parent: Dir;
-  name: string;
-
-  size: number;
-}
-type AnyDir = Dir | UnexploredDir;
-type DirEntry = File | Dir;
-
 export const decode = (s: string): Command[] => {
   const commandsS = s.split("\n$ ");
 
@@ -72,17 +52,63 @@ export const decode = (s: string): Command[] => {
   return commandsS.map(decodeComamnd);
 };
 
-export const makeRootDir = (): UnexploredDir => {
+interface InFlightFile {
+  parent: DiscoveredDir;
+  name: string;
+
+  size: number;
+}
+interface UnexploredDir {
+  parent: DiscoveredDir;
+  name: string;
+
+  entries: undefined;
+}
+interface UnexploredRoot {
+  parent: UnexploredRoot;
+  name: string;
+
+  entries: undefined;
+}
+interface DiscoveredDir {
+  parent: DiscoveredDir;
+  name: string;
+
+  entries: InFlightEntry[];
+}
+type InFlightDir = DiscoveredDir | UnexploredDir | UnexploredRoot;
+type InFlightEntry = InFlightDir | InFlightFile;
+
+interface File {
+  parent: Dir;
+  name: string;
+
+  size: number;
+}
+interface Dir {
+  parent: Dir;
+  name: string;
+
+  entries: DirEntry[];
+}
+type DirEntry = File | Dir;
+
+export const makeRootDir = (): UnexploredRoot => {
   // deno-lint-ignore no-explicit-any
-  const result: any = { name: "/", entries: undefined, parent: undefined };
+  const result: any = { name: "/", entries: undefined };
   result.parent = result;
-  return result as UnexploredDir;
+  return result;
 };
 
-const makeTree = (curr: AnyDir, command: Command): AnyDir => {
+const makeTree = (curr: InFlightDir, command: Command): InFlightDir => {
   if ("cd" in command) {
     const { cd: targetName } = command;
-    if (targetName == "..") return curr.parent;
+    if (targetName == "..") {
+      if (curr.parent == curr) {
+        return assertNever({ reason: "Can't traverse up from root.", curr });
+      }
+      return curr.parent;
+    }
 
     if (!curr.entries) {
       return assertNever({
@@ -106,29 +132,38 @@ const makeTree = (curr: AnyDir, command: Command): AnyDir => {
       });
     }
 
-    (curr as unknown as Dir).entries = command.ls.map((e): DirEntry => {
-      (e as unknown as DirEntry).parent = curr as unknown as Dir;
-      if (!("size" in e)) {
-        (e as unknown as UnexploredDir).entries = undefined;
-      }
-      return e as DirEntry;
+    // We're about to turn curr from an UnexploredDir to a DiscoveredDir.
+    // Having this const makes it simpler for type checking, but they're the
+    // same on purpose, since we want to mutate in-place (as opposed to
+    // rebuilding the tree).
+    const newCurr: DiscoveredDir = curr as unknown as DiscoveredDir;
+
+    newCurr.entries = command.ls.map((e: LsEntry): InFlightEntry => {
+      // Same typing trick.
+      const newE = e as unknown as InFlightEntry;
+
+      newE.parent = newCurr;
+      if (!("size" in newE)) newE.entries = undefined;
+
+      return newE;
     });
-    return curr;
+
+    return newCurr;
   }
 
   return assertNever({ curr, command });
 };
 
-const getRoot = (d: Dir): Dir => {
+const getRoot = <T extends Dir | InFlightDir>(d: T): T => {
   if (d.parent === d) return d;
-  return getRoot(d.parent);
+  return getRoot(d.parent as T);
 };
 
-export const preTraverseTree = (d: DirEntry): DirEntry[] => {
+export function preTraverseTree(d: DirEntry): DirEntry[] {
   if ("size" in d) return [d];
 
   return [d as DirEntry].concat(d.entries.flatMap(preTraverseTree));
-};
+}
 
 // deno-lint-ignore no-explicit-any
 export const isDir = (o: any): o is Dir =>
@@ -143,13 +178,36 @@ const isFile = (o: any): o is File =>
   "name" in o &&
   "size" in o;
 
+function assertNotInFlightAnymore(e: InFlightFile): File;
+function assertNotInFlightAnymore(e: InFlightDir): Dir;
+function assertNotInFlightAnymore(e: InFlightEntry): DirEntry {
+  // Files are never quite in flight.
+  if ("size" in e) return e as File;
+
+  // Dirs need the entries to be there, and for all of them to also not be in flight.
+  if (
+    e.entries && e.entries.all((e) => {
+      // Thanks, Typescript. 🤦
+      if ("size" in e) return !!assertNotInFlightAnymore(e);
+      return !!assertNotInFlightAnymore(e);
+    })
+  ) {
+    return e as Dir;
+  }
+
+  return assertNever(e);
+}
+
 export const totalSize = (d: Dir): number =>
   preTraverseTree(d).filter(isFile).map((f) => f.size).reduce(add);
 
-const TARGET_SIZE = 100000;
 const input_contents = await input_reader(import.meta.resolve);
 const commands = decode(input_contents);
-export const tree = getRoot(commands.reduce(makeTree, makeRootDir()) as Dir);
+export const tree = assertNotInFlightAnymore(
+  getRoot(commands.reduce(makeTree, makeRootDir())),
+);
+
+const TARGET_SIZE = 100000;
 const a = preTraverseTree(tree).filter(isDir).map(totalSize).filter((s) =>
   s <= TARGET_SIZE
 ).reduce(add);
