@@ -4,5 +4,6 @@ export const input_reader = async (resolve: (a: string) => string) =>
   );
 
 export const assertNever = (o: unknown): never => {
-  throw new Error(`Expected to be unreachable, got ${JSON.stringify(o)}`);
+  console.error(o);
+  throw new Error(`Expected to be unreachable.`);
 };
