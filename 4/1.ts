@@ -14,7 +14,7 @@ const decodeRange = (s: string): Range => {
   };
 };
 
-interface RangePair {
+export interface RangePair {
   left: Range;
   right: Range;
 }
@@ -30,14 +30,18 @@ const decodeRangePair = (s: string): RangePair => {
 const fullyContain = (ra: Range, rb: Range): boolean => {
   return ra.lower <= rb.lower && rb.upper <= ra.upper;
 };
+
 const oneRangeFullyContainsTheOther = (rp: RangePair): boolean => {
   return fullyContain(rp.left, rp.right) || fullyContain(rp.right, rp.left);
 };
 
-const a = (await input_reader(import.meta.resolve))
-  .trim()
-  .split("\n")
-  .map(decodeRangePair)
+export const decode = (s: string): RangePair[] =>
+  s
+    .trim()
+    .split("\n")
+    .map(decodeRangePair);
+
+const a = decode(await input_reader(import.meta.resolve))
   .filter(oneRangeFullyContainsTheOther)
   .length;
 

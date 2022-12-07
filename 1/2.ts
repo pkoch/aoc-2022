@@ -1,11 +1,7 @@
 import { input_reader } from "../libtapete.ts";
+import { add, decode } from "./1.ts";
 
-const add = (a: number, b: number): number => a + b;
-
-const a = (await input_reader(import.meta.resolve))
-  .trim()
-  .split("\n\n")
-  .map((span) => span.split("\n").map((l) => +new Number(l)))
+const a = decode(await input_reader(import.meta.resolve))
   .map((l) => l.reduce(add))
   .sort()
   .slice(-3)

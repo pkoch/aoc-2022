@@ -1,8 +1,9 @@
 import { assertNever, input_reader } from "../libtapete.ts";
+import "../langExts/Object/thrush.ts";
 
 const zip = <U, V>(a: U[], b: V[]): [U, V?][] => a.map((k, i) => [k, b.at(i)]);
 
-interface MoveOrder {
+export interface MoveOrder {
   n: number;
   from: string;
   to: string;
@@ -20,7 +21,7 @@ const decodeMoveOrder = (s: string): MoveOrder => {
   };
 };
 
-type CrateStacks = Record<string, string[]>;
+export type CrateStacks = Record<string, string[]>;
 
 // This regexp assume that all places are followed with a space. This is mostly
 // true, as that's the separator. However, that's not true for the last column.
@@ -48,7 +49,7 @@ const decodeCrateStacks = (s: string): CrateStacks => {
   return result;
 };
 
-const decode = (s: string): {
+export const decode = (s: string): {
   crateStacks: CrateStacks;
   moveOrders: MoveOrder[];
 } => {
@@ -71,15 +72,19 @@ const applyMoveOrder = (state: CrateStacks, order: MoveOrder): CrateStacks => {
   return result;
 };
 
-const { crateStacks, moveOrders } = decode(
+export const showTops = (state: CrateStacks): string =>
+  state
+    .thrush(Object.values)
+    .map((s) => s.at(-1)!)
+    .reduce((a, b) => a + b);
+
+const a = decode(
   await input_reader(import.meta.resolve),
-);
-
-const endState = moveOrders.reduce(applyMoveOrder, crateStacks);
-
-const a = Object.values(endState)
-  .map((s) => s.at(-1)!)
-  .reduce((a, b) => a + b);
+)
+  .thrush(({ crateStacks, moveOrders }) =>
+    moveOrders.reduce(applyMoveOrder, crateStacks)
+  )
+  .thrush(showTops);
 
 export default a;
 

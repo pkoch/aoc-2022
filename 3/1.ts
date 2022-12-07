@@ -1,22 +1,9 @@
-import { input_reader } from "../libtapete.ts";
-import { assertNever } from "../libtapete.ts";
+import { assertNever, input_reader } from "../libtapete.ts";
+import "../langExts/String/splitAt.ts";
 
-declare global {
-  interface String {
-    splitAt: (pos: number) => string[];
-  }
-}
+export const add = (a: number, b: number): number => a + b;
 
-String.prototype.splitAt = function (pos: number): string[] {
-  return [
-    this.slice(0, pos),
-    this.slice(pos, this.length),
-  ];
-};
-
-const add = (a: number, b: number): number => a + b;
-
-const intersect = (items: string[]): string =>
+export const intersect = (items: string[]): string =>
   [
     ...items.map((i) => new Set(i)).reduce((a, b) =>
       new Set([...a.values()].filter((n) => b.has(n)))
@@ -24,7 +11,7 @@ const intersect = (items: string[]): string =>
   ].join("");
 
 const VALID_ITEMS = /^[a-zA-Z]$/;
-const priority = (c: string): number => {
+export const priority = (c: string): number => {
   if (!c.match(VALID_ITEMS)) return assertNever(c);
 
   const charCode = c.charCodeAt(0);

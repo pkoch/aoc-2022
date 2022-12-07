@@ -1,8 +1,8 @@
 import { assertNever, input_reader } from "../libtapete.ts";
 
-const add = (a: number, b: number): number => a + b;
+export const add = (a: number, b: number): number => a + b;
 
-enum Play {
+export enum Play {
   Rock,
   Paper,
   Scisors,
@@ -24,7 +24,7 @@ const decodePlay = (str: string): Play => {
   }
 };
 
-const losesTo = new Map<Play, Play>([
+export const losesTo = new Map<Play, Play>([
   [Play.Paper, Play.Rock],
   [Play.Scisors, Play.Paper],
   [Play.Rock, Play.Scisors],
@@ -32,9 +32,9 @@ const losesTo = new Map<Play, Play>([
 
 const flip = <A, B>([k, v]: [A, B]): [B, A] => [v, k];
 
-const winsTo = new Map<Play, Play>([...losesTo.entries()].map(flip));
+export const winsTo = new Map<Play, Play>([...losesTo.entries()].map(flip));
 
-const score = ([them, ours]: [Play, Play]): number => {
+export const score = ([them, ours]: [Play, Play]): number => {
   return scoreCombo([them, ours]) + scoreOurHand(ours);
 };
 
