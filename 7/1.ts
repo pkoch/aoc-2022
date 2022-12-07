@@ -124,14 +124,14 @@ const getRoot = (d: Dir): Dir => {
   return getRoot(d.parent);
 };
 
-const preTraverseTree = (d: DirEntry): DirEntry[] => {
+export const preTraverseTree = (d: DirEntry): DirEntry[] => {
   if ("size" in d) return [d];
 
   return [d as DirEntry].concat(d.entries.flatMap(preTraverseTree));
 };
 
 // deno-lint-ignore no-explicit-any
-const isDir = (o: any): o is Dir =>
+export const isDir = (o: any): o is Dir =>
   "parent" in o &&
   "name" in o &&
   "entries" in o &&
@@ -143,13 +143,13 @@ const isFile = (o: any): o is File =>
   "name" in o &&
   "size" in o;
 
-const totalSize = (d: Dir): number =>
+export const totalSize = (d: Dir): number =>
   preTraverseTree(d).filter(isFile).map((f) => f.size).reduce(add);
 
 const TARGET_SIZE = 100000;
 const input_contents = await input_reader(import.meta.resolve);
 const commands = decode(input_contents);
-const tree = getRoot(commands.reduce(makeTree, makeRootDir()) as Dir);
+export const tree = getRoot(commands.reduce(makeTree, makeRootDir()) as Dir);
 const a = preTraverseTree(tree).filter(isDir).map(totalSize).filter((s) =>
   s <= TARGET_SIZE
 ).reduce(add);
