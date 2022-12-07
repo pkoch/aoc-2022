@@ -15,10 +15,7 @@ const decodeLsEntry = (s: string): LsEntry => {
 
   if (left == "dir") return { name };
 
-  return {
-    size: +new Number(left),
-    name,
-  };
+  return { name, size: +new Number(left) };
 };
 
 interface Cd {
@@ -120,7 +117,10 @@ const isFile = (o: any): o is File =>
   "size" in o;
 
 export const totalSize = (d: Dir): number =>
-  preTraverseTree(d).filter(isFile).map((f) => f.size).reduce(add);
+  preTraverseTree(d)
+    .filter(isFile)
+    .map((f) => f.size)
+    .reduce(add);
 
 const input_contents = await input_reader(import.meta.resolve);
 const commands = decode(input_contents);
@@ -128,9 +128,11 @@ const commands = decode(input_contents);
 export const tree = getRoot(commands.reduce(makeTree, makeRootDir()));
 
 const TARGET_SIZE = 100000;
-const a = preTraverseTree(tree).filter(isDir).map(totalSize).filter((s) =>
-  s <= TARGET_SIZE
-).reduce(add);
+const a = preTraverseTree(tree)
+  .filter(isDir)
+  .map(totalSize)
+  .filter((s) => s <= TARGET_SIZE)
+  .reduce(add);
 
 export default a;
 

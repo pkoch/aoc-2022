@@ -9,7 +9,8 @@ const a = preTraverseTree(tree)
   .filter(isDir)
   .map(totalSize)
   .filter((s) => s >= targetSpace)
-  .toSorted((a, b) => a - b)[0];
+  .toSorted((a, b) => a - b)
+  .at(0);
 
 export default a;
 
