@@ -1,29 +1,26 @@
 import {
-  assertNever,
   input_reader,
   notUndefined,
   toNumber,
   transpose,
 } from "../libtapete.ts";
-import "../langExts/Object/tap.ts";
+import "../langExts/Object/thrush.ts";
 
-const Directions = [
+export const Directions = [
   "up",
   "down",
   "left",
   "right",
 ] as const;
 
-type Direction = typeof Directions[number];
+export type Direction = typeof Directions[number];
 
-type VisibilityStatus = boolean | undefined;
-
-export interface Cell {
+export interface Cell<T> {
   height: number;
-  up: VisibilityStatus;
-  down: VisibilityStatus;
-  left: VisibilityStatus;
-  right: VisibilityStatus;
+  up: T | undefined;
+  down: T | undefined;
+  left: T | undefined;
+  right: T | undefined;
 }
 
 const newCell = (height: number) => ({
@@ -34,7 +31,7 @@ const newCell = (height: number) => ({
   right: undefined,
 });
 
-export const decode = (s: string): Cell[][] => {
+export const decode = (s: string): number[][] => {
   return s
     .trim()
     .split("\n")
@@ -43,12 +40,10 @@ export const decode = (s: string): Cell[][] => {
         .trim()
         .split("")
         .map(toNumber)
-        .map(newCell)
-    )
-    .tap(assingVisibilities);
+    );
 };
 
-function traceSight(arr: Cell[], direction: Direction): void {
+function traceSight(arr: Cell<boolean>[], direction: Direction): void {
   let maxHeight = -1; // Border zeros are considered visible.
   for (const cell of arr) {
     cell[direction] = cell.height > maxHeight;
@@ -58,7 +53,11 @@ function traceSight(arr: Cell[], direction: Direction): void {
 
 const reversed = <T>(arr: T[]): T[] => [...arr].reverse();
 
-export const assingVisibilities = (lines: Cell[][]): void => {
+export const populateCells = <T>(
+  numberLines: number[][],
+  populator: (c: Cell<T>[], d: Direction) => void,
+): Cell<T>[][] => {
+  const lines = numberLines.map((l) => l.map(newCell));
   // This reshapes the arrays, but they reference the same Cell objects.
   const columns = transpose(lines);
 
@@ -67,21 +66,29 @@ export const assingVisibilities = (lines: Cell[][]): void => {
     ["right", lines.map(reversed)],
     ["up", columns],
     ["down", columns.map(reversed)],
-  ] as const).map(([direction, arrs]) =>
-    arrs.map((arr) => traceSight(arr, direction))
+  ] as const).forEach(([direction, arrs]) =>
+    arrs.forEach((arr) => populator(arr, direction))
   );
+
+  return lines;
 };
 
-const lines = decode(await input_reader(import.meta.resolve));
+export const visibilities = (numberLines: number[][]): Cell<boolean>[][] =>
+  populateCells(numberLines, traceSight);
 
-export const visible = (c: Cell): boolean => {
-  return Directions.map((d: Direction) => notUndefined(c[d])).reduce((a, b) =>
-    a || b
-  );
-};
+export const numberLines = decode(await input_reader(import.meta.resolve));
+const lines = visibilities(numberLines);
 
-export const countVisibles = (board: Cell[][]): number =>
-  board.flatMap((l) => l.map(visible)).filter((a) => a).length;
+export const visible = (c: Cell<boolean>): boolean =>
+  Directions
+    .map((d: Direction) => notUndefined(c[d]))
+    .reduce((a, b) => a || b);
+
+export const countVisibles = (board: Cell<boolean>[][]): number =>
+  board
+    .flatMap((l) => l.map(visible))
+    .filter((a) => a)
+    .length;
 
 const a = countVisibles(lines);
 
