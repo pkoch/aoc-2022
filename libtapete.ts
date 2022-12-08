@@ -9,3 +9,6 @@ export const assertNever = (o: unknown): never => {
 };
 
 export const add = (a: number, b: number): number => a + b;
+
+// deno-lint-ignore no-explicit-any
+export const toNumber = (o: any): number => +new Number(o);

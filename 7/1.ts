@@ -1,4 +1,4 @@
-import { add, assertNever, input_reader } from "../libtapete.ts";
+import { add, assertNever, input_reader, toNumber } from "../libtapete.ts";
 import "../langExts/String/splitAt.ts";
 
 interface LsDir {
@@ -15,7 +15,7 @@ const decodeLsEntry = (s: string): LsEntry => {
 
   if (left == "dir") return { name };
 
-  return { name, size: +new Number(left) };
+  return { name, size: toNumber(left) };
 };
 
 interface Cd {

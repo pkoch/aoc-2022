@@ -1,4 +1,4 @@
-import { input_reader } from "../libtapete.ts";
+import { input_reader, toNumber } from "../libtapete.ts";
 
 interface Range {
   // Inclusive on both sides.
@@ -7,7 +7,7 @@ interface Range {
 }
 
 const decodeRange = (s: string): Range => {
-  const a = s.split("-", 2).map((n) => +new Number(n));
+  const a = s.split("-", 2).map(toNumber);
   return {
     lower: a[0],
     upper: a[1],

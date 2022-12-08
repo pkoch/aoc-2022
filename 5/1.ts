@@ -1,4 +1,4 @@
-import { assertNever, input_reader } from "../libtapete.ts";
+import { assertNever, input_reader, toNumber } from "../libtapete.ts";
 import "../langExts/Object/thrush.ts";
 
 const zip = <U, V>(a: U[], b: V[]): [U, V?][] => a.map((k, i) => [k, b.at(i)]);
@@ -15,7 +15,7 @@ const decodeMoveOrder = (s: string): MoveOrder => {
   if (!match) return assertNever(s);
 
   return {
-    n: +new Number(match[1]),
+    n: toNumber(match[1]),
     from: match[2],
     to: match[3],
   };
