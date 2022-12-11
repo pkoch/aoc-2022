@@ -10,6 +10,9 @@ export const Directions = [
 
 export type Direction = typeof Directions[number];
 
+const isDirection = (s: string): s is Direction =>
+  Directions.includes(s as Direction);
+
 export const decode = (s: string): Direction[] => {
   return s
     .trim()
@@ -20,9 +23,7 @@ export const decode = (s: string): Direction[] => {
 const decodeDirections = (s: string): Direction[] => {
   const [direction, nS] = s.trim().split(" ");
   const n = toNumber(nS);
-  if (!Directions.includes(direction as Direction)) {
-    return assertNever(direction);
-  }
+  if (!isDirection(direction)) return assertNever(direction);
 
   const result = new Array(n);
   result.fill(direction);
@@ -49,7 +50,7 @@ export const move = (c: Coordinate, d: Direction, n = 1): Coordinate => {
   }
 };
 
-const areTrouching = (tail: Coordinate, head: Coordinate) => {
+const areTrouching = (head: Coordinate, tail: Coordinate): boolean => {
   return !(
     tail.x < head.x - 1 ||
     tail.x > head.x + 1 ||
