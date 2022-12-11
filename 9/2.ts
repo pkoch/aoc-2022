@@ -2,9 +2,8 @@ import "../langExts/Object/thrush.ts";
 import {
   chase,
   Coordinate,
-  countUnique,
+  countUniqueTailPositions,
   Direction,
-  directions,
   move,
 } from "./1.ts";
 
@@ -38,10 +37,7 @@ const advanceBoard = (board: Board, direction: Direction): Board => {
   return { knots, tailTrail };
 };
 
-const a = directions
-  .reduce(advanceBoard, newBoard())
-  .tailTrail
-  .thrush(countUnique);
+const a = countUniqueTailPositions(advanceBoard, newBoard);
 
 export default a;
 

@@ -99,10 +99,18 @@ export const countUnique = <T>(arr: T[]): number =>
 
 export const directions = decode(await input_reader(import.meta.resolve));
 
-const a = directions
-  .reduce(advanceBoard, newBoard())
-  .tailTrail
-  .thrush(countUnique);
+export const countUniqueTailPositions = <
+  Board extends { tailTrail: Coordinate[] },
+>(
+  advanceBoard: (b: Board, d: Direction) => Board,
+  newBoard: () => Board,
+) =>
+  directions
+    .reduce(advanceBoard, newBoard())
+    .tailTrail
+    .thrush(countUnique);
+
+const a = countUniqueTailPositions(advanceBoard, newBoard);
 
 export default a;
 
