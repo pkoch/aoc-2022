@@ -1,8 +1,4 @@
-import {
-  assertNever,
-  input_reader,
-  toNumber,
-} from "../libtapete.ts";
+import { assertNever, input_reader, toNumber } from "../libtapete.ts";
 import "../langExts/Object/thrush.ts";
 
 export const Directions = [
@@ -38,16 +34,16 @@ export interface Coordinate {
   y: number;
 }
 
-const move = (c: Coordinate, d: Direction): Coordinate => {
+export const move = (c: Coordinate, d: Direction, n = 1): Coordinate => {
   switch (d) {
     case "U":
-      return { ...c, y: c.y + 1 };
+      return { ...c, y: c.y + n };
     case "D":
-      return { ...c, y: c.y - 1 };
+      return { ...c, y: c.y - n };
     case "R":
-      return { ...c, x: c.x + 1 };
+      return { ...c, x: c.x + n };
     case "L":
-      return { ...c, x: c.x - 1 };
+      return { ...c, x: c.x - n };
     default:
       return assertNever(d);
   }
@@ -62,35 +58,16 @@ const areTrouching = (tail: Coordinate, head: Coordinate) => {
   );
 };
 
-const chase = (head: Coordinate, tail: Coordinate): Coordinate => {
+export const chase = (head: Coordinate, tail: Coordinate): Coordinate => {
   if (areTrouching(tail, head)) return tail;
 
   const dx = head.x - tail.x;
   const dy = head.y - tail.y;
-  switch (`${Math.abs(dx)}${Math.abs(dy)}`) {
-    case "20":
-      return {
-        ...tail,
-        x: tail.x + Math.sign(dx),
-      };
-    case "02":
-      return {
-        ...tail,
-        y: tail.y + Math.sign(dy),
-      };
-    case "21":
-      return {
-        x: tail.x + Math.sign(dx),
-        y: head.y,
-      };
-    case "12":
-      return {
-        x: head.x,
-        y: tail.y + Math.sign(dy),
-      };
-    default:
-      return assertNever({ tail, head, t: areTrouching(tail, head) });
-  }
+
+  return {
+    x: tail.x + Math.sign(dx),
+    y: tail.y + Math.sign(dy),
+  };
 };
 
 interface Board {
@@ -104,8 +81,8 @@ const newBoard = (): Board => {
     head: { x: 0, y: 0 },
     tail: { x: 0, y: 0 },
     tailTrail: [],
-  }
-}
+  };
+};
 
 const advanceBoard = (board: Board, direction: Direction): Board => {
   const { head: oldHead, tail: oldTail, tailTrail: oldTailTrail } = board;
@@ -117,12 +94,13 @@ const advanceBoard = (board: Board, direction: Direction): Board => {
   return { head, tail, tailTrail };
 };
 
-const countUnique = <T>(arr: T[]): number => [...new Set(arr.map(o => JSON.stringify(o)))].length;
+export const countUnique = <T>(arr: T[]): number =>
+  [...new Set(arr.map((o) => JSON.stringify(o)))].length;
 
 export const directions = decode(await input_reader(import.meta.resolve));
 
 const a = directions
-  .reduce((board, dir) => advanceBoard(board, dir), newBoard())
+  .reduce(advanceBoard, newBoard())
   .tailTrail
   .thrush(countUnique);
 
