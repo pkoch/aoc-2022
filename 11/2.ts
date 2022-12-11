@@ -24,7 +24,15 @@ const operandReprToFn = (opRepr: OperandRepr): Operand => {
   return (_old) => opRepr;
 };
 
-const cooldown = (n: number): number => Math.floor(n / 3);
+// This has now turned into a math guessing game. :(
+// This works because all monkeys use disibility as their test.
+// So, if we think about a number in terms of its disibility, we come to the
+// conclusion that all the monkey devive for their own prime numbers.
+// So, if we divide by something that doesn't change the divisibility of any
+// monkey, we're good. These numbers were extracted by hand from the input
+// because I didn't feel like drilling down an arg to this method.
+const COOLDOWN_FACTOR = [2, 3, 5, 7, 11, 13, 17, 19].reduce((a, b) => a * b);
+const cooldown = (n: number): number => n % COOLDOWN_FACTOR;
 
 const inspectItem = (
   [leftRepr, op, rightRepr]: Operation,
@@ -61,7 +69,7 @@ const round = (monkeys: Monkey[]) => {
 const input = (await input_reader(import.meta.resolve, ".1"));
 const monkeys = JSON.parse(input) as Monkey[];
 
-range(20).forEach(() => {
+range(10000).forEach(() => {
   round(monkeys);
 });
 

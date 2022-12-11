@@ -1,7 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.167.0/testing/asserts.ts";
 
 import a1 from "./1.ts";
-// import a2 from "./2.ts";
+import a2 from "./2.ts";
 
 Deno.test({
   name: "1",
@@ -10,9 +10,9 @@ Deno.test({
   },
 });
 
-// Deno.test({
-//   name: "2",
-//   fn() {
-//     assertEquals(a2, 2665);
-//   },
-// });
+Deno.test({
+  name: "2",
+  fn() {
+    assertEquals(a2, 28537348205);
+  },
+});
