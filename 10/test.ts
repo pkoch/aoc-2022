@@ -3,7 +3,7 @@ import "../langExts/Object/thrush.ts";
 import { decode, registerValues } from "./1.ts";
 
 import a1 from "./1.ts";
-// import a2 from "./2.ts";
+import a2 from "./2.ts";
 
 const sample1Instructions = `
 noop
@@ -35,9 +35,20 @@ Deno.test({
   },
 });
 
-// Deno.test({
-//   name: "2",
-//   fn() {
-//     assertEquals(a2, 2665);
-//   },
-// });
+Deno.test({
+  name: "2",
+  fn() {
+    // RJERPEFC
+    assertEquals(
+      a2,
+      `
+###....##.####.###..###..####.####..##..
+#..#....#.#....#..#.#..#.#....#....#..#.
+#..#....#.###..#..#.#..#.###..###..#....
+###.....#.#....###..###..#....#....#....
+#.#..#..#.#....#.#..#....#....#....#..#.
+#..#..##..####.#..#.#....####.#.....##..
+    `.trim(),
+    );
+  },
+});
