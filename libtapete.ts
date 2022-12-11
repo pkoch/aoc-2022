@@ -32,3 +32,11 @@ export const notUndefined = <T>(a: T | undefined): T => {
   if (a === undefined) return assertNever(a);
   return a;
 };
+
+export const crochet = <T>(arr: T[], f: (a: T, b: T) => T, initial: T): T[] => {
+  const result = [initial];
+  for (const obj of arr) {
+    result.push(f(result.at(-1)!, obj));
+  }
+  return result;
+};

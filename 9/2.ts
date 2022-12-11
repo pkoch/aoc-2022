@@ -1,4 +1,5 @@
 import "../langExts/Object/thrush.ts";
+import { crochet } from "../libtapete.ts";
 import {
   chase,
   Coordinate,
@@ -17,14 +18,6 @@ const newBoard = (): Board => {
     knots: new Array(10).fill(null).map(() => ({ x: 0, y: 0 })),
     tailTrail: [],
   };
-};
-
-const crochet = <T>(arr: T[], f: (a: T, b: T) => T, initial: T): T[] => {
-  const result = [initial];
-  for (const obj of arr) {
-    result.push(f(result.at(-1)!, obj));
-  }
-  return result;
 };
 
 const advanceBoard = (board: Board, direction: Direction): Board => {
