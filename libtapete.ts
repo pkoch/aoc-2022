@@ -1,6 +1,9 @@
-export const input_reader = async (resolve: (a: string) => string) =>
+export const input_reader = async (
+  resolve: (a: string) => string,
+  nameSuffix = "",
+) =>
   (new TextDecoder("utf-8")).decode(
-    await Deno.readFile(resolve("./input").split("://")[1]),
+    await Deno.readFile(resolve(`./input${nameSuffix}`).split("://")[1]),
   );
 
 export const assertNever = (o: unknown): never => {
@@ -37,6 +40,14 @@ export const crochet = <T>(arr: T[], f: (a: T, b: T) => T, initial: T): T[] => {
   const result = [initial];
   for (const obj of arr) {
     result.push(f(result.at(-1)!, obj));
+  }
+  return result;
+};
+
+export const range = (n: number): number[] => {
+  const result = [];
+  for (let i = 0; i < n; i++) {
+    result.push(i);
   }
   return result;
 };
