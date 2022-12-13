@@ -50,7 +50,7 @@ export const move = (c: Coordinate, d: Direction, n = 1): Coordinate => {
   }
 };
 
-const areTrouching = (head: Coordinate, tail: Coordinate): boolean => {
+const areTouching = (head: Coordinate, tail: Coordinate): boolean => {
   return !(
     tail.x < head.x - 1 ||
     tail.x > head.x + 1 ||
@@ -60,7 +60,7 @@ const areTrouching = (head: Coordinate, tail: Coordinate): boolean => {
 };
 
 export const chase = (head: Coordinate, tail: Coordinate): Coordinate => {
-  if (areTrouching(tail, head)) return tail;
+  if (areTouching(tail, head)) return tail;
 
   const dx = head.x - tail.x;
   const dy = head.y - tail.y;
