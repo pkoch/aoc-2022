@@ -7,15 +7,16 @@ const decodeRaw = (s: string): string[][] =>
   s.trim().split("\n").map((l) => l.trim().split(""));
 
 export type Coord = { y: number; x: number };
-const findChar = (grid: string[][], targetChar: string): Coord => {
+const findAllChar = (grid: string[][], targetChar: string): Coord[] => {
+  const result = [];
   for (const [line, y] of grid.map((l, i): [string[], number] => [l, i])) {
     for (const [char, x] of line.map((c, i): [string, number] => [c, i])) {
       if (targetChar == char) {
-        return { y, x };
+        result.push({ y, x });
       }
     }
   }
-  return assertNever({ grid, targetChar });
+  return result;
 };
 
 type Grid = number[][];
@@ -27,14 +28,14 @@ const cantonsDecls = {
 
 type Cantons = keyof typeof cantonsDecls;
 type RawBoard =
-  & { grid: Grid }
+  & { grid: Grid; allAs: Coord[] }
   & { [K in Cantons]: Coord };
 
 export const decode = (s: string): RawBoard => {
   const stringGrid = decodeRaw(s);
   const cantons: Record<Cantons, Coord> = cantonsDecls
     .thrush(Object.entries)
-    .map(([char, _]) => [char, findChar(stringGrid, char)])
+    .map(([char, _]) => [char, findAllChar(stringGrid, char)[0]])
     .thrush(Object.fromEntries);
 
   cantons.thrush(Object.entries).forEach(([char, coord]) => {
@@ -44,6 +45,7 @@ export const decode = (s: string): RawBoard => {
 
   return {
     grid: stringGrid.map((l) => l.map(decodeChar)),
+    allAs: findAllChar(stringGrid, "a"),
     ...cantons,
   };
 };
@@ -65,7 +67,7 @@ export const makeBoard = (rb: RawBoard): Board => {
     maxY: rb.grid.length - 1,
     maxX: rb.grid[0].length - 1,
     target: rb.E,
-    unexplored: [[rb.S]],
+    unexplored: rb.allAs.map((c) => [c]),
     cheapestPath: new Map(),
   };
 };

@@ -1,10 +1,9 @@
 import { assertEquals } from "https://deno.land/std@0.167.0/testing/asserts.ts";
 import "../langExts/Array/enumerate.ts";
-import { assertNever, zip } from "../libtapete.ts";
-import a, { Coord, Path } from "./1.ts";
+import { assertNever } from "../libtapete.ts";
 
-import a1, { Board, decode, findPath, makeBoard } from "./1.ts";
-// import a2 from "./2.ts";
+import a1, { Board, Coord, decode, findPath, makeBoard, Path } from "./1.ts";
+import a2 from "./2.ts";
 
 const exampleInput = `
 Sabqponm
@@ -72,9 +71,9 @@ Deno.test({
   },
 });
 
-// Deno.test({
-//   name: "2",
-//   fn() {
-//     assertEquals(a2, 28537348205);
-//   },
-// });
+Deno.test({
+  name: "2",
+  fn() {
+    assertEquals(a2(), 508);
+  },
+});
