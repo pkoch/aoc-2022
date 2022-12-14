@@ -1,4 +1,4 @@
-import { add, assertNever, input_reader, range } from "../libtapete.ts";
+import { assertNever, input_reader } from "../libtapete.ts";
 import "../langExts/Object/thrush.ts";
 
 const decodeChar = (c: string) => c.charCodeAt(0)! - "a".charCodeAt(0)!;
@@ -97,9 +97,7 @@ const explore = (board: Board, path: Path): Path[] => {
     .filter(({ y, x }) =>
       0 <= x && x <= board.maxX && 0 <= y && y <= board.maxY
     )
-    .filter((newCoord) =>
-      Math.abs(heightAt(board, newCoord) - heightAt(board, c)) <= 1
-    )
+    .filter((newCoord) => heightAt(board, newCoord) - heightAt(board, c) <= 1)
     .map((coord) => [...path, coord]);
 };
 
